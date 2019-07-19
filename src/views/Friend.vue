@@ -10,67 +10,41 @@
                 <Icon type="ios-add-circle" class="add-friend" size="26" @click="addFriend" />
             </div>
             <div class="list">
-                <div class="item"
-                     v-for="(item, index) in list"
-                     :key="index"
-                     :class="{active: selectIndex === index}"
-                     @click="selectChat(item, index)"
-                >
-                    <Avatar class="user-icon" shape="square" :src="item.icon" size="large" />
-                    <div class="message-info">
-                        <p class="name">{{item.name}}</p>
-                        <p class="last-message">{{item.last}}</p>
+                <div v-if="list.length > 0">
+                    <div class="item"
+                         v-for="(item, index) in list"
+                         :key="index"
+                         :class="{active: selectIndex === index}"
+                         @click="selectChat(item, index)"
+                    >
+                        <Avatar class="user-icon" shape="square" :src="item.icon || 'logo.png'" size="large" />
+                        <div class="message-info">
+                            <p class="name">{{item.username}}</p>
+                            <p class="last-message">{{item.last}}</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="message-content">
-            <div class="header">
-                <span class="name">{{ list[selectIndex].name }}</span>
-            </div>
-            <div class="content">
-                <div class="chat-show" ref="chatShow">
-
+        <div class="friend-content">
+            <div v-if="list.length > 0">
+                <div class="header">
+                    <p>{{list[selectIndex].username}}</p>
                 </div>
+                <Button type="success" :to="{path: '/message', query: {user: list[selectIndex].username}}">发消息</Button>
             </div>
         </div>
     </div>
 </template>
 
 <script>
-    import MyLine from '../components/MyLine'
-    import FriendLine from '../components/FriendLine'
-    import TimeLine from '../components/TimeLine'
     export default {
-        name: "message",
-        components: {
-            MyLine,
-            FriendLine,
-            TimeLine
-        },
+        name: "friend",
         data() {
             return {
                 searchText: '',
                 selectIndex: 0,
-                list: [
-                    {
-                        icon: 'user.png',
-                        name: '任小仙',
-                        last: '最后一条消息最后一条消息最后一条消息最后一条消息最后一条消息最后一条消息'
-                    }, {
-                        icon: 'user.png',
-                        name: '大魔王',
-                        last: '最后一条消息最后一条消息最后一条消息最后一条消息最后一条消息最后一条消息'
-                    }, {
-                        icon: 'user.png',
-                        name: '青春斗',
-                        last: '最后一条消息最后一条消息最后一条消息最后一条消息最后一条消息最后一条消息'
-                    }, {
-                        icon: 'user.png',
-                        name: '二百五',
-                        last: '最后一条消息最后一条消息最后一条消息最后一条消息最后一条消息最后一条消息'
-                    },
-                ],
+                list: [],
                 chat: {
                     content: '123'
                 },
@@ -89,32 +63,64 @@
             //  添加朋友
             addFriend() {
                 let value = '';
+                let mark = '';
                 this.$Modal.confirm({
                     render: (h) => {
-                        return h('Input', {
-                            props: {
-                                value,
-                                autofocus: true,
-                                placeholder: '输入好友账号'
-                            },
-                            on: {
-                                input: (val) => {
-                                    value = val;
+                        return h('div', [
+                            h('Input', {
+                                props: {
+                                    value,
+                                    autofocus: true,
+                                    placeholder: '好友账号'
+                                },
+                                style: {
+                                    marginBottom: '10px'
+                                },
+                                on: {
+                                    input: (val) => {
+                                        value = val;
+                                    }
                                 }
-                            }
-                        })
+                            }),
+                            h('Input', {
+                                props: {
+                                    value: mark,
+                                    autofocus: true,
+                                    placeholder: '备注：我是XXX'
+                                },
+                                on: {
+                                    input: (val) => {
+                                        mark = val;
+                                    }
+                                }
+                            })
+                        ])
                     },
                     onOk: () => {
-                        axios.post('/user/addFriend', {username: value}).then(res => {
+                        // this.$socket.emit('test', {
+                        //     username: value,
+                        //     mark
+                        // });
+                        axios.post('/user/addFriend', {username: value, mark}).then(res => {
                             if( res.data.code !== 200 ) {
                                 this.$Message.error(res.data.msg);
                             } else {
                                 this.$Message.success('添加成功');
+                                this.getFriendList();
                             }
                         });
                     }
                 })
+            },
+            //  获取好友列表
+            getFriendList() {
+                axios.get('/user/getFriendList').then(res => {
+                    this.list = res.data;
+                });
             }
+        },
+        mounted() {
+            this.getFriendList();
         }
     }
 </script>
@@ -166,27 +172,12 @@
             }
         }
     }
-    .message-content{
+    .friend-content{
         position: relative;
         display: flex;
         flex: 1;
         background-color: #F5F5F5;
         flex-direction: column;
-        .header{
-            height: 65px;
-            border-bottom: 1px solid #E7E7E7;
-            .name{
-                line-height: 80px;
-                margin-left: 30px;
-                font-size: 24px;
-            }
-        }
-        .content{
-            flex: 1;
-            overflow-y: scroll;
-            position: relative;
-            padding: 24px 36px;
-        }
     }
     .search-container{
         background-color: #EFEEEE;
@@ -221,25 +212,6 @@
             width: 130px;
             margin-left: 10px;
             top: 1px;
-        }
-    }
-    .new-message{
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        span{
-            position: absolute;
-            right: 30px;
-            bottom: 30px;
-            padding: 5px 20px;
-            background-color: #a8d8b9;
-            text-align: center;
-            z-index: 99;
-            color: #42602d;
-            cursor: pointer;
-            border-radius: 20px;
         }
     }
 </style>

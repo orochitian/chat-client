@@ -79,18 +79,18 @@
                         { required: true, message: '密码不能为空', trigger: 'blur' },
                         //{ pattern: /^[a-zA-Z0-9]{8,16}$/, message: '密码格式不正确', trigger: 'blur' }
                     ],
-                    fullname: [
-                        { required: true, message: '姓名不能为空', trigger: 'blur' },
-                        { pattern: /(^[\u4e00-\u9fa5]{2,8}$)|(^[a-zA-Z]{2,16}$)/, message: '姓名格式不正确', trigger: 'blur' }
-                    ],
-                    email: [
-                        { required: true, message: '邮箱不能为空', trigger: 'blur' },
-                        { pattern: /^\w[-\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\.)+[A-Za-z]{2,14}$/, message: '邮箱格式不正确', trigger: 'blur' }
-                    ],
-                    tel: [
-                        { required: true, message: '手机号不能为空', trigger: 'blur' },
-                        { pattern: /^(1(3|4|5|6|7|8|9)|9(2|8))\d{9}$/, message: '手机号格式不正确', trigger: 'blur' }
-                    ]
+                    // fullname: [
+                    //     { required: true, message: '姓名不能为空', trigger: 'blur' },
+                    //     { pattern: /(^[\u4e00-\u9fa5]{2,8}$)|(^[a-zA-Z]{2,16}$)/, message: '姓名格式不正确', trigger: 'blur' }
+                    // ],
+                    // email: [
+                    //     { required: true, message: '邮箱不能为空', trigger: 'blur' },
+                    //     { pattern: /^\w[-\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\.)+[A-Za-z]{2,14}$/, message: '邮箱格式不正确', trigger: 'blur' }
+                    // ],
+                    // tel: [
+                    //     { required: true, message: '手机号不能为空', trigger: 'blur' },
+                    //     { pattern: /^(1(3|4|5|6|7|8|9)|9(2|8))\d{9}$/, message: '手机号格式不正确', trigger: 'blur' }
+                    // ]
                 }
             }
         },

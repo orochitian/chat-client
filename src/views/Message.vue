@@ -29,15 +29,15 @@
             </div>
             <div class="content">
                 <div class="chat-show" ref="chatShow">
-                    <MyLine img="user.png" v-for="(message, index) in my" :msg="message"></MyLine>
+                    <!--<MyLine img="user.png" v-for="(message, index) in my" :msg="message"></MyLine>-->
                     <!--<div style="text-align: center;">-->
                         <!--<a href="javascript:;" v-if="total > 0" @click="checkMore">查看更多消息...</a>-->
                     <!--</div>-->
-                    <!--<div v-for="(li, index) in list" :key="index">-->
-                        <!--<patientLine v-if="li.type === 'patient'" :img="userInfo.userPhoto ? userInfo.userPhoto : 'touxiang_1.png'" :msg="li.msg"></patientLine>-->
-                        <!--<DoctorLine v-else-if="li.type === 'doctor'" img="touxiang_2.png" :msg="li.msg"></DoctorLine>-->
+                    <div v-for="(li, index) in messageList" :key="index">
+                        <FriendLine v-if="li.from === $route.query.user" img="logo.png" :msg="li.msg"></FriendLine>
+                        <MyLine v-else-if="li.to === $route.query.user" img="user.png" :msg="li.msg"></MyLine>
                         <!--<TimeLine v-else-if="li.type === 'time'" :msg="li.msg"></TimeLine>-->
-                    <!--</div>-->
+                    </div>
                 </div>
                 <!--<div class="new-message">-->
                     <!--<span @click="">新消息...</span>-->
@@ -88,7 +88,8 @@
                 chat: {
                     content: '123'
                 },
-                my: []
+                messageList: [],
+                user: ''
             }
         },
         methods: {
@@ -100,10 +101,41 @@
             selectChat(item, index) {
                 this.selectIndex = index;
             },
+            //  获取聊天记录
+            getMessageHistory() {
+                axios.get('/user/getMessageHistory', {
+                    params: {
+                        username: this.$route.query.user
+                    }
+                }).then(res => {
+                    console.log(res.data);
+                    this.messageList = res.data.messages;
+                    this.user = res.data.user;
+                });
+            },
             sendMessage() {
-                this.my.push( this.chat.content );
+                this.$socket.emit('sendMessage', {
+                    from: this.user,
+                    to: this.$route.query.user,
+                    msg: this.chat.content
+                });
                 this.chat.content = '';
+                // axios.post('/user/sendMessage', {
+                //     username: this.$route.query.user,
+                //     msg: this.chat.content
+                // }).then(res => {
+                //     this.chat.content = '';
+                // });
             }
+        },
+        mounted() {
+            this.getMessageHistory();
+            this.$socket.on('newMessage', data => {
+                if( data.to === this.$route.query.user || data.from === this.$route.query.user ) {
+                    console.log(this.messageList);
+                    this.messageList.push(data);
+                }
+            });
         }
     }
 </script>

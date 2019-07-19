@@ -9,12 +9,12 @@
                     </router-link>
                 </h2>
             </div>
-            <Menu active-name="message" theme="dark" width="auto">
-                <MenuItem name="message" to="/message">
-                    <Icon type="ios-chatbubbles" size="30" />
-                </MenuItem>
+            <Menu active-name="friends" theme="dark" width="auto">
                 <MenuItem name="friends" to="/friend">
                     <Icon type="md-contacts" size="30" />
+                </MenuItem>
+                <MenuItem name="message" to="/message">
+                    <Icon type="ios-chatbubbles" size="30" />
                 </MenuItem>
             </Menu>
             <div class="menu" @click="menu">
@@ -34,6 +34,7 @@
 </template>
 
 <script>
+    import io from 'socket.io-client'
     export default {
         name: 'layout',
         data() {

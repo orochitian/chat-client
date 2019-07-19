@@ -17,7 +17,7 @@ export default new Router({
             children: [
                 {
                     path: '/',
-                    component: Message
+                    component: Friend
                 },
                 {
                     path: '/message',
