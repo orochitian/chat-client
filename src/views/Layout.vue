@@ -34,7 +34,6 @@
 </template>
 
 <script>
-    import io from 'socket.io-client'
     export default {
         name: 'layout',
         data() {
@@ -49,7 +48,7 @@
                     content: '是否退出当前账号？',
                     onOk: () => {
                         axios.get('/logout').then(res => {
-                            window.sessionStorage.removeItem('chat-login');
+                            sessionStorage.removeItem('chat-token');
                             this.$router.push('/login');
                         });
                     }

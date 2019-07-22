@@ -102,9 +102,7 @@
                         //     mark
                         // });
                         axios.post('/user/addFriend', {username: value, mark}).then(res => {
-                            if( res.data.code !== 200 ) {
-                                this.$Message.error(res.data.msg);
-                            } else {
+                            if( res.data.code === 200 ) {
                                 this.$Message.success('添加成功');
                                 this.getFriendList();
                             }
@@ -115,7 +113,9 @@
             //  获取好友列表
             getFriendList() {
                 axios.get('/user/getFriendList').then(res => {
-                    this.list = res.data;
+                    if( res.data.code === 200 ) {
+                        this.list = res.data.data.list;
+                    }
                 });
             }
         },

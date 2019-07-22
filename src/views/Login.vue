@@ -32,21 +32,13 @@
         methods: {
             loginHandle() {
                 if( !this.formItem.username || !this.formItem.password ) {
-                    this.$Modal.error({
-                        title: '提示：',
-                        content: '请输入用户名和密码！'
-                    });
+                    this.$Message.error('请输入用户名和密码！');
                     return;
                 }
                 axios.post('/login', this.formItem).then(res => {
-                    if( res.data ) {
-                        window.sessionStorage.setItem('chat-login', 1);
+                    if( res.data.code === 200 ) {
+                        window.sessionStorage.setItem('chat-token', res.data.data);
                         this.$router.push('/');
-                    } else {
-                        this.$Modal.error({
-                            title: '提示：',
-                            content: '用户名或密码错误！'
-                        });
                     }
                 });
             }

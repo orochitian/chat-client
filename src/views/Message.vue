@@ -66,25 +66,7 @@
             return {
                 searchText: '',
                 selectIndex: 0,
-                list: [
-                    {
-                        icon: 'user.png',
-                        name: '任小仙',
-                        last: '最后一条消息最后一条消息最后一条消息最后一条消息最后一条消息最后一条消息'
-                    }, {
-                        icon: 'user.png',
-                        name: '大魔王',
-                        last: '最后一条消息最后一条消息最后一条消息最后一条消息最后一条消息最后一条消息'
-                    }, {
-                        icon: 'user.png',
-                        name: '青春斗',
-                        last: '最后一条消息最后一条消息最后一条消息最后一条消息最后一条消息最后一条消息'
-                    }, {
-                        icon: 'user.png',
-                        name: '二百五',
-                        last: '最后一条消息最后一条消息最后一条消息最后一条消息最后一条消息最后一条消息'
-                    },
-                ],
+                list: [{}],
                 chat: {
                     content: '123'
                 },
@@ -108,9 +90,9 @@
                         username: this.$route.query.user
                     }
                 }).then(res => {
-                    console.log(res.data);
-                    this.messageList = res.data.messages;
-                    this.user = res.data.user;
+                    this.messageList = res.data.data.messages;
+                    this.user = res.data.data.user;
+                    this.$socket.emit('single chat', this.user);
                 });
             },
             sendMessage() {
@@ -131,10 +113,13 @@
         mounted() {
             this.getMessageHistory();
             this.$socket.on('newMessage', data => {
-                if( data.to === this.$route.query.user || data.from === this.$route.query.user ) {
-                    console.log(this.messageList);
+                console.log(data);
+                if( data.from === this.user || ( data.from === this.$route.query.user && data.to === this.user ) ) {
                     this.messageList.push(data);
                 }
+                // if( data.to === this.$route.query.user || data.from === this.$route.query.user ) {
+                //     this.messageList.push(data);
+                // }
             });
         }
     }

@@ -14,13 +14,21 @@ Vue.component('editor', editor);
 
 Vue.use(iview);
 
-
 axios.defaults.baseURL = 'http://localhost';
 axios.defaults.withCredentials = true;
-axios.interceptors.response.use((res) => {
+axios.interceptors.request.use(req => {
+    req.headers.token = sessionStorage.getItem('chat-token');
+    return req;
+}, err => {
+    return Promise.reject(err)
+});
+axios.interceptors.response.use(res => {
+    //  如果服务器返回登录失效
     if( res.data.code === 401 ) {
-        window.sessionStorage.setItem('chat-login', 0);
+        window.sessionStorage.removeItem('chat-token');
         router.push('/login');
+    } else if( res.data.code !== 200 ) {
+        iview.Message.warning(res.data.msg);
     }
     return res;
 }, error => {
@@ -32,8 +40,8 @@ router.beforeEach((to, from, next) => {
     if( to.path === '/login' ) {
         next();
     } else {
-        let login = window.sessionStorage.getItem('chat-login');
-        if( !login || login !== '1' ) {
+        let token = window.sessionStorage.getItem('chat-token');
+        if( !token ) {
             next({ path: "/login", replace: true });
         } else {
             next();
