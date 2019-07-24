@@ -18,7 +18,7 @@
                 </MenuItem>
             </Menu>
             <div class="menu" @click="menu">
-                <Icon type="ios-menu-outline" size="30" />
+                <Icon type="ios-exit-outline" size="30" />
             </div>
         </Sider>
 

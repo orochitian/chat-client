@@ -1,5 +1,5 @@
 <template>
-    <div ref="editor"></div>
+    <div ref="editor" @keydown="keySend"></div>
 </template>
 
 <script>
@@ -26,6 +26,9 @@
             }
         },
         methods: {
+            keySend(ev) {
+                this.$emit('keySend', ev);
+            },
             uploadToServer(file, callback) {
                 var xhr = new XMLHttpRequest();
                 var formData = new FormData();

@@ -106,7 +106,7 @@
                         axios.post('/regist', this.formData).then(res => {
                             if( res.data.code === 200 ) {
                                 this.$refs.userAddForm.resetFields();
-                                this.$Message.success(res.data.msg);
+                                this.$Message.success('添加成功，请登录');
                                 this.$emit('on-submit');
                             } else {
                                 this.$Message.error(res.data.msg);

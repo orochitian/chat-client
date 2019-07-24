@@ -27,25 +27,30 @@
             <div class="header">
                 <span class="name">{{ list[selectIndex].name }}</span>
             </div>
-            <div class="content">
-                <div class="chat-show" ref="chatShow">
-                    <!--<MyLine img="user.png" v-for="(message, index) in my" :msg="message"></MyLine>-->
-                    <!--<div style="text-align: center;">-->
-                        <!--<a href="javascript:;" v-if="total > 0" @click="checkMore">查看更多消息...</a>-->
-                    <!--</div>-->
-                    <div v-for="(li, index) in messageList" :key="index">
-                        <FriendLine v-if="li.from === $route.query.user" img="logo.png" :msg="li.msg"></FriendLine>
-                        <MyLine v-else-if="li.to === $route.query.user" img="user.png" :msg="li.msg"></MyLine>
-                        <!--<TimeLine v-else-if="li.type === 'time'" :msg="li.msg"></TimeLine>-->
+            <div class="container">
+                <div class="content" ref="chatShow">
+                    <div class="chat-show">
+                        <div style="text-align: center;" v-if="lastCount > 0">
+                            <Icon type="ios-time-outline" size="14" style="margin-right: 3px; color: #2d8cf0" />
+                            <a href="javascript:;" @click="checkMore" style="vertical-align: middle;">查看更多消息...</a>
+                        </div>
+                        <div v-for="(li, index) in messageList" :key="index">
+                            <FriendLine v-if="li.from === $route.query.user" img="logo.png" :msg="li.msg"></FriendLine>
+                            <MyLine v-else-if="li.to === $route.query.user" img="user.png" :msg="li.msg"></MyLine>
+                            <!--<TimeLine v-else-if="li.type === 'time'" :msg="li.msg"></TimeLine>-->
+                        </div>
                     </div>
                 </div>
-                <!--<div class="new-message">-->
-                    <!--<span @click="">新消息...</span>-->
-                <!--</div>-->
+                <div class="new-message" v-show="hasNewMessage">
+                    <span @click="">新消息...</span>
+                </div>
             </div>
+
             <div class="send">
-                <editor :content="chat.content" @edit="chat.content = arguments[0]"></editor>
-                <Button type="primary" @click="sendMessage">发送</Button>
+                <editor :content="chat.content" @edit="chat.content = arguments[0]" @keySend="keySend"></editor>
+                <div class="send-btn-container">
+                    <Button class="send-btn" type="primary" @click="sendMessage">发送(Ctrl+Enter)</Button>
+                </div>
             </div>
         </div>
     </div>
@@ -71,10 +76,18 @@
                     content: '123'
                 },
                 messageList: [],
-                user: ''
+                user: '',
+                pageNum: 1,
+                lastCount: 0,
+                hasNewMessage: false
             }
         },
         methods: {
+            keySend(ev) {
+                if( ev.keyCode === 13 && ev.ctrlKey ) {
+                    this.sendMessage();
+                }
+            },
             //  清除搜索内容
             clearSearch() {
                 this.searchText = '';
@@ -83,16 +96,39 @@
             selectChat(item, index) {
                 this.selectIndex = index;
             },
+            checkMore() {
+                this.pageNum++;
+                this.getMessageHistory();
+            },
             //  获取聊天记录
             getMessageHistory() {
                 axios.get('/user/getMessageHistory', {
                     params: {
-                        username: this.$route.query.user
+                        username: this.$route.query.user,
+                        pageNum: this.pageNum
                     }
                 }).then(res => {
-                    this.messageList = res.data.data.messages;
-                    this.user = res.data.data.user;
-                    this.$socket.emit('single chat', this.user);
+                    if( res.data.code === 200 ) {
+                        //  如果pageNum > 1，表示在查看历史记录
+                        if( this.pageNum > 1 ) {
+                            let scrollTop = this.$refs.chatShow.scrollHeight;
+                            res.data.data.messages.forEach(item => {
+                                this.messageList.unshift(item);
+                            });
+                            this.$nextTick(() => {
+                                let top = this.$refs.chatShow.scrollHeight - scrollTop;
+                                this.$refs.chatShow.scrollTop = top;
+                            });
+                        } else {
+                            this.messageList = res.data.data.messages;
+                            this.$nextTick(() => {
+                                this.$refs.chatShow.scrollTop = this.$refs.chatShow.scrollHeight;
+                            });
+                        }
+                        this.user = res.data.data.user;
+                        this.lastCount = res.data.data.lastCount;
+                        this.$socket.emit('single chat', this.user);
+                    }
                 });
             },
             sendMessage() {
@@ -102,25 +138,37 @@
                     msg: this.chat.content
                 });
                 this.chat.content = '';
-                // axios.post('/user/sendMessage', {
-                //     username: this.$route.query.user,
-                //     msg: this.chat.content
-                // }).then(res => {
-                //     this.chat.content = '';
-                // });
             }
         },
         mounted() {
             this.getMessageHistory();
             this.$socket.on('newMessage', data => {
-                console.log(data);
                 if( data.from === this.user || ( data.from === this.$route.query.user && data.to === this.user ) ) {
                     this.messageList.push(data);
+                    if( data.from === this.user ) {
+                        this.$nextTick(() => {
+                            this.$refs.chatShow.scrollTop = this.$refs.chatShow.scrollHeight;
+                        });
+                    } else {
+                        let scrollBottom = this.$refs.chatShow.scrollHeight - this.$refs.chatShow.scrollTop - this.$refs.chatShow.clientHeight;
+                        if( scrollBottom > 60 ) {
+                            this.$nextTick(() => {
+                                this.hasNewMessage = true;
+                            });
+                        } else {
+                            this.$nextTick(() => {
+                                this.$refs.chatShow.scrollTop = this.$refs.chatShow.scrollHeight;
+                            });
+                        }
+                    }
                 }
-                // if( data.to === this.$route.query.user || data.from === this.$route.query.user ) {
-                //     this.messageList.push(data);
-                // }
             });
+            this.$refs.chatShow.onscroll = (ev) => {
+                let scrollBottom = this.$refs.chatShow.scrollHeight - this.$refs.chatShow.scrollTop - this.$refs.chatShow.clientHeight;
+                if( scrollBottom < 60 ) {
+                    this.hasNewMessage = false;
+                }
+            }
         }
     }
 </script>
@@ -187,15 +235,38 @@
                 font-size: 24px;
             }
         }
-        .content{
-            flex: 1;
-            overflow-y: scroll;
+        .container{
             position: relative;
+            flex: 1;
+            overflow: hidden;
+        }
+        .content{
+            position: relative;
+            overflow-y: scroll;
             padding: 24px 36px;
+            width: 100%;
+            & /deep/ img{
+                max-width: 100%;
+            }
+            z-index: 9;
         }
         .send{
+            position: relative;
             height: 260px;
-            padding-bottom: 42px;
+            padding-bottom: 41px;
+            .send-btn-container{
+                width: 180px;
+                position: absolute;
+                right: 0;
+                top: 41px;
+                bottom: 0;
+                background-color: #fff;
+            }
+            .send-btn{
+                position: absolute;
+                right: 30px;
+                bottom: 30px;
+            }
         }
     }
     .search-container{
@@ -234,15 +305,30 @@
         height: 100%;
         span{
             position: absolute;
-            right: 30px;
-            bottom: 30px;
-            padding: 5px 20px;
-            background-color: #a8d8b9;
+            right: 40px;
+            bottom: 20px;
+            padding: 5px 30px;
+            background-color: rgba(137, 190, 178, .8);
             text-align: center;
             z-index: 99;
-            color: #42602d;
+            color: #fff;
             cursor: pointer;
             border-radius: 20px;
+            transition: 1s ease-in-out;
         }
+    }
+</style>
+
+<style lang="scss">
+    .ql-container{
+        position: absolute;
+        top: 41px;
+        bottom: 0;
+        left: 0;
+        right: 160px;
+        height: auto;
+    }
+    .ql-editor{
+
     }
 </style>
