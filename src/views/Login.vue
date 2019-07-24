@@ -37,7 +37,7 @@
                 }
                 axios.post('/login', this.formItem).then(res => {
                     if( res.data.code === 200 ) {
-                        window.sessionStorage.setItem('chat-token', res.data.data);
+                        window.sessionStorage.setItem('chat-user', JSON.stringify(res.data.data));
                         this.$router.push('/');
                     }
                 });

@@ -3,10 +3,8 @@
         <!--  ======================= Sidebar =======================  -->
         <Sider id="side-bar" width="65">
             <div class="logo">
-                <h2>
-                    <router-link to="/">
-                        <Avatar shape="square" src="user.png" />
-                    </router-link>
+                <h2 @click="userEditShow = true" style="cursor: pointer;">
+                    <Avatar shape="square" src="user.png" />
                 </h2>
             </div>
             <Menu active-name="friends" theme="dark" width="auto">
@@ -30,15 +28,22 @@
                 </transition>
             </Content>
         </Layout>
+
+        <userEdit :show="userEditShow" @on-close="userEditShow = false"></userEdit>
     </div>
 </template>
 
 <script>
+    import userEdit from './users/UserEdit';
     export default {
         name: 'layout',
+        components: {
+            userEdit
+        },
         data() {
             return {
-                userData: {}
+                userData: {},
+                userEditShow: false
             }
         },
         methods: {
@@ -48,12 +53,15 @@
                     content: '是否退出当前账号？',
                     onOk: () => {
                         axios.get('/logout').then(res => {
-                            sessionStorage.removeItem('chat-token');
+                            sessionStorage.removeItem('chat-user');
                             this.$router.push('/login');
                         });
                     }
                 });
             }
+        },
+        mounted() {
+            this.userData = JSON.parse(sessionStorage.getItem('chat-user'));
         }
     }
 </script>

@@ -17,7 +17,10 @@ Vue.use(iview);
 axios.defaults.baseURL = 'http://localhost';
 axios.defaults.withCredentials = true;
 axios.interceptors.request.use(req => {
-    req.headers.token = sessionStorage.getItem('chat-token');
+    let user = JSON.parse(sessionStorage.getItem('chat-user'));
+    if( user ) {
+        req.headers.token = user.token
+    }
     return req;
 }, err => {
     return Promise.reject(err)
@@ -25,7 +28,7 @@ axios.interceptors.request.use(req => {
 axios.interceptors.response.use(res => {
     //  如果服务器返回登录失效
     if( res.data.code === 401 ) {
-        window.sessionStorage.removeItem('chat-token');
+        window.sessionStorage.removeItem('chat-user');
         router.push('/login');
     } else if( res.data.code !== 200 ) {
         iview.Message.warning(res.data.msg);
@@ -40,7 +43,7 @@ router.beforeEach((to, from, next) => {
     if( to.path === '/login' ) {
         next();
     } else {
-        let token = window.sessionStorage.getItem('chat-token');
+        let token = sessionStorage.getItem('chat-user');
         if( !token ) {
             next({ path: "/login", replace: true });
         } else {
