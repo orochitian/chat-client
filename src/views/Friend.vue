@@ -10,6 +10,10 @@
                 <Icon type="ios-add-circle" class="add-friend" size="26" @click="addFriend" />
             </div>
             <div class="list">
+                <div class="new-friend" :class="{active: selectIndex < 0}" @click="selectNewFriend">
+                    <Avatar class="icon" shape="square" icon="md-person-add" size="large" />
+                    <p class="text">新的朋友</p>
+                </div>
                 <div v-if="list.length > 0">
                     <div class="item"
                          v-for="(item, index) in list"
@@ -19,20 +23,21 @@
                     >
                         <Avatar class="user-icon" shape="square" :src="item.icon || 'logo.png'" size="large" />
                         <div class="message-info">
-                            <p class="name">{{item.username}}</p>
-                            <p class="last-message">{{item.last}}</p>
+                            <p class="name">{{item.nickname || item.username}}</p>
+                            <p class="last-message">{{item.mood}}</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="friend-content">
-            <div v-if="list.length > 0">
-                <div class="header">
-                    <p>{{list[selectIndex].username}}</p>
-                </div>
-                <Button type="success" :to="{path: '/message', query: {user: list[selectIndex].username}}">发消息</Button>
-            </div>
+            <router-view />
+            <!--<div v-if="list.length > 0">-->
+                <!--<div class="header">-->
+                    <!--<p>{{list[selectIndex].username}}</p>-->
+                <!--</div>-->
+                <!--<Button type="success" :to="{path: '/message', query: {user: list[selectIndex].username}}">发消息</Button>-->
+            <!--</div>-->
         </div>
     </div>
 </template>
@@ -42,13 +47,10 @@
         name: "friend",
         data() {
             return {
+                addFriendShow: false,
                 searchText: '',
                 selectIndex: 0,
-                list: [],
-                chat: {
-                    content: '123'
-                },
-                my: []
+                list: []
             }
         },
         methods: {
@@ -56,9 +58,15 @@
             clearSearch() {
                 this.searchText = '';
             },
+            //  查看好友申请
+            selectNewFriend() {
+                this.selectIndex = -1;
+                this.$router.push('/friend/friendRequest');
+            },
             //  选择聊天
             selectChat(item, index) {
                 this.selectIndex = index;
+                this.$router.push({path: '/message', query: {user: this.list[index].username}});
             },
             //  添加朋友
             addFriend() {
@@ -97,14 +105,9 @@
                         ])
                     },
                     onOk: () => {
-                        // this.$socket.emit('test', {
-                        //     username: value,
-                        //     mark
-                        // });
                         axios.post('/user/addFriend', {username: value, mark}).then(res => {
                             if( res.data.code === 200 ) {
-                                this.$Message.success('添加成功');
-                                this.getFriendList();
+                                this.$Message.success('好友申请发送成功');
                             }
                         });
                     }
@@ -114,7 +117,8 @@
             getFriendList() {
                 axios.get('/user/getFriendList').then(res => {
                     if( res.data.code === 200 ) {
-                        this.list = res.data.data.list;
+                        this.list = res.data.data;
+                        console.log(this.list);
                     }
                 });
             }
@@ -169,6 +173,30 @@
                     text-overflow: ellipsis;
                     overflow: hidden;
                 }
+            }
+        }
+        .new-friend{
+            user-select: none;
+            padding: 10px;
+            &:hover{
+                background-color: rgba(0, 0, 0, .1);
+            }
+            &.active{
+                background-color: rgba(0, 0, 0, .2);
+            }
+            .icon{
+                margin-left: 20px;
+                color: #fff;
+                background-color: #FA9D3B;
+            }
+            .text{
+                width: 170px;
+                display: inline-block;
+                margin-top: 2px;
+                margin-left: 10px;
+                font-size: 14px;
+                vertical-align: middle;
+                color: #000;
             }
         }
     }

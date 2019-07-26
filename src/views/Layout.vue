@@ -4,16 +4,16 @@
         <Sider id="side-bar" width="65">
             <div class="logo">
                 <h2 @click="userEditShow = true" style="cursor: pointer;">
-                    <Avatar shape="square" src="user.png" />
+                    <Avatar shape="square" :src="userData.icon || 'default.jpg'" />
                 </h2>
             </div>
             <Menu active-name="friends" theme="dark" width="auto">
                 <MenuItem name="friends" to="/friend">
                     <Icon type="md-contacts" size="30" />
                 </MenuItem>
-                <MenuItem name="message" to="/message">
-                    <Icon type="ios-chatbubbles" size="30" />
-                </MenuItem>
+                <!--<MenuItem name="message" to="/message">-->
+                    <!--<Icon type="ios-chatbubbles" size="30" />-->
+                <!--</MenuItem>-->
             </Menu>
             <div class="menu" @click="menu">
                 <Icon type="ios-exit-outline" size="30" />
@@ -29,6 +29,7 @@
             </Content>
         </Layout>
 
+        <!--  ======================= Edit User Info =======================  -->
         <userEdit :show="userEditShow" @on-close="userEditShow = false"></userEdit>
     </div>
 </template>
@@ -62,6 +63,7 @@
         },
         mounted() {
             this.userData = JSON.parse(sessionStorage.getItem('chat-user'));
+            this.$socket.on('')
         }
     }
 </script>

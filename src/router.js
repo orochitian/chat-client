@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import Layout from './views/Layout'
 import Message from './views/Message'
 import Friend from './views/Friend'
+import FriendRequest from './views/FriendRequest'
 import Login from './views/Login'
 
 Vue.use(Router)
@@ -25,7 +26,13 @@ export default new Router({
                 },
                 {
                     path: '/friend',
-                    component: Friend
+                    component: Friend,
+                    children: [
+                        {
+                            path: 'friendRequest',
+                            component: FriendRequest
+                        }
+                    ]
                 },
             ]
         },
