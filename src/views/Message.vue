@@ -3,7 +3,7 @@
         <div class="friend-info">
             <div class="name">
                 <Avatar class="icon" shape="square" :src="friend.icon" size="large" />
-                <span>{{friend.nickname || friend.username}}</span>
+                <span class="nickname">{{friend.nickname || friend.username}}</span>
             </div>
             <div class="info">
                 <div class="item">
@@ -12,11 +12,11 @@
                 </div>
                 <div class="item">
                     <span>生日：</span>
-                    <span>{{friend.sex}}</span>
+                    <span>{{friend.birthday}}</span>
                 </div>
                 <div class="item">
                     <span>血型：</span>
-                    <span>{{friend.sex}}</span>
+                    <span>{{friend.bloodType}}</span>
                 </div>
                 <div class="item">
                     <span>家乡：</span>
@@ -218,6 +218,22 @@
         display: flex;
         flex-direction: column;
         background-color: #EFEEEE;
+        .name{
+            padding: 0 50px;
+            margin: 30px 0;
+            .icon{
+                margin-right: 20px;
+            }
+            .nickname{
+                font-size: 20px;
+            }
+        }
+        .info{
+            padding: 0 50px;
+            .item{
+                margin-top: 10px;
+            }
+        }
     }
     .message-content{
         position: relative;
