@@ -169,22 +169,23 @@
         },
         mounted() {
             this.getMessageHistory();
+            let chatShow = this.$refs.chatShow;
             this.$socket.on('newMessage', data => {
                 if( data.from === this.user.username || ( data.from === this.friendId && data.to === this.user.username ) ) {
                     this.messageList.push(data);
                     if( data.from === this.user.username ) {
                         this.$nextTick(() => {
-                            this.$refs.chatShow.scrollTop = this.$refs.chatShow.scrollHeight;
+                            chatShow.scrollTop = chatShow.scrollHeight;
                         });
                     } else {
-                        let scrollBottom = this.$refs.chatShow.scrollHeight - this.$refs.chatShow.scrollTop - this.$refs.chatShow.clientHeight;
+                        let scrollBottom = chatShow.scrollHeight - chatShow.scrollTop - chatShow.clientHeight;
                         if( scrollBottom > 60 ) {
                             this.$nextTick(() => {
                                 this.hasNewMessage = true;
                             });
                         } else {
                             this.$nextTick(() => {
-                                this.$refs.chatShow.scrollTop = this.$refs.chatShow.scrollHeight;
+                                chatShow.scrollTop = chatShow.scrollHeight;
                             });
                         }
                     }
@@ -193,11 +194,10 @@
 
             axios.get('/user/getUser', {params: {username: this.friendId}}).then(res => {
                 this.friend = res.data.data;
-                console.log(this.friend);
             });
 
-            this.$refs.chatShow.onscroll = (ev) => {
-                let scrollBottom = this.$refs.chatShow.scrollHeight - this.$refs.chatShow.scrollTop - this.$refs.chatShow.clientHeight;
+            chatShow.onscroll = (ev) => {
+                let scrollBottom = chatShow.scrollHeight - chatShow.scrollTop - chatShow.clientHeight;
                 if( scrollBottom < 60 ) {
                     this.hasNewMessage = false;
                 }
