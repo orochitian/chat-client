@@ -4,7 +4,7 @@
         <Sider id="side-bar" width="65">
             <div class="logo">
                 <h2 @click="userEditShow = true" style="cursor: pointer;">
-                    <Avatar shape="square" :src="userData.icon || 'default.jpg'" />
+                    <Avatar shape="square" :src="userData.icon || '/default.jpg'" @on-error="imgError" />
                 </h2>
             </div>
             <Menu active-name="friends" theme="dark" width="auto">
@@ -48,6 +48,9 @@
             }
         },
         methods: {
+            imgError(ev) {
+                ev.target.src = '/default.jpg';
+            },
             menu() {
                 this.$Modal.confirm({
                     title: '提示',
@@ -63,7 +66,17 @@
         },
         mounted() {
             this.userData = JSON.parse(sessionStorage.getItem('chat-user'));
-            this.$socket.on('')
+            //  处理socket
+            //  加入socket
+            this.$socket.emit('join', this.userData.username);
+            //  捕获好友申请
+            this.$socket.on('friend request', param => {
+                this.$Notice.warning({
+                    title: '好友申请',
+                    desc: `${param.from} 向您发出好友申请：<br/> ${param.mark}`,
+                    duration: 0
+                });
+            });
         }
     }
 </script>
