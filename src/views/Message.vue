@@ -2,7 +2,7 @@
     <div class="container">
         <div class="friend-info">
             <div class="name">
-                <Avatar class="icon" shape="square" :src="friend.icon" size="large" />
+                <Avatar class="icon" shape="square" :src="friend.icon || '/default.jpg'" size="large" />
                 <span class="nickname">{{friend.nickname || friend.username}}</span>
             </div>
             <div class="info">
@@ -61,8 +61,8 @@
                             <a href="javascript:;" @click="checkMore" style="vertical-align: middle;">查看更多消息...</a>
                         </div>
                         <div v-for="(li, index) in messageList" :key="index">
-                            <FriendLine v-if="li.from === friendId" :img="friend.icon || 'default.jpg'" :msg="li.msg"></FriendLine>
-                            <MyLine v-else-if="li.to === friendId" :img="user.icon" :msg="li.msg"></MyLine>
+                            <FriendLine v-if="li.from === friendId" :img="friend.icon || '/default.jpg'" :msg="li.msg"></FriendLine>
+                            <MyLine v-else-if="li.to === friendId" :img="user.icon || '/default.jpg'" :msg="li.msg"></MyLine>
                             <!--<TimeLine v-else-if="li.type === 'time'" :msg="li.msg"></TimeLine>-->
                         </div>
                     </div>
@@ -110,19 +110,13 @@
             }
         },
         methods: {
+            //  ctrl+enter发送
             keySend(ev) {
                 if( ev.keyCode === 13 && ev.ctrlKey ) {
                     this.sendMessage();
                 }
             },
-            //  清除搜索内容
-            clearSearch() {
-                this.searchText = '';
-            },
-            //  选择聊天
-            selectChat(item, index) {
-                this.selectIndex = index;
-            },
+            //  查看历史消息
             checkMore() {
                 this.pageNum++;
                 this.getMessageHistory();
@@ -154,11 +148,15 @@
                         }
                         this.user = JSON.parse(sessionStorage.getItem('chat-user'));
                         this.lastCount = res.data.data.lastCount;
-                        this.$socket.emit('single chat', this.user.username);
                     }
                 });
             },
             sendMessage() {
+                let content = this.chat.content.replace(/<p>(\s+|<br>)<\/p>/g, '');
+                if( !content ) {
+                    this.$Message.warning('无法发送空白消息');
+                    return;
+                }
                 this.$socket.emit('sendMessage', {
                     from: this.user.username,
                     to: this.friendId,
@@ -260,6 +258,7 @@
             position: relative;
             height: 260px;
             padding-bottom: 41px;
+            overflow: hidden;
             .send-btn-container{
                 width: 180px;
                 position: absolute;
