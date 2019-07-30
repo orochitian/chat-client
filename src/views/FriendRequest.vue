@@ -19,6 +19,7 @@
             </div>
         </div>
         <Alert v-else type="warning">暂无好友申请</Alert>
+        <Button type="error" @click="deleteFriends">删除所有好友关系（仅为了测试方便）</Button>
         <Spin size="large" fix v-if="loading"></Spin>
     </div>
 </template>
@@ -33,6 +34,14 @@
             }
         },
         methods: {
+            deleteFriends() {
+                axios.get('/user/deleteFriends').then(res => {
+                    if( res.data.code === 200 ) {
+                        this.$Message.success('好友关系已删除');
+                        this.$router.push('/friend');
+                    }
+                });
+            },
             getRequestList() {
                 axios.get('/user/friendRequestList').then(res => {
                     this.list = res.data.data;
@@ -47,7 +56,6 @@
                 }).then(res => {
                     if( res.data.code === 200 ) {
                         this.getRequestList();
-                        // this.$router.push('/friend/friendRequest');
                     }
                 });
             }
