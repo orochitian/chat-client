@@ -1,14 +1,33 @@
 <template>
-    <div class="line">
+    <div class="line" @dblclick="doubleClick">
         <div class="text-bg" v-html="msg"></div>
         <Avatar :src="img" class="img" />
+        <Modal v-model="imgModal.show" :width="800" :footer-hide="true" style="text-align: center;">
+            <img :src="imgModal.src" style="max-width: 100%;">
+        </Modal>
     </div>
 </template>
 
 <script>
     export default {
         name: "doctor-chat",
-        props: ['img', 'msg']
+        props: ['img', 'msg'],
+        data() {
+            return {
+                imgModal: {
+                    show: false,
+                    src: ''
+                }
+            }
+        },
+        methods: {
+            doubleClick(ev) {
+                if( ev.target.localName === 'img' ) {
+                    this.imgModal.show = true;
+                    this.imgModal.src = ev.target.src;
+                }
+            }
+        }
     }
 </script>
 
