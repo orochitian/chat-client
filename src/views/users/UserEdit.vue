@@ -12,7 +12,7 @@
             <Form :model="userData" :label-width="60">
                 <FormItem label="头像">
                 <span @click="iconShow = true" style="cursor: pointer;">
-                    <Avatar shape="square" :src="userData.icon || 'default.jpg'" size="large" />
+                    <Avatar shape="square" :src="userData.icon || '/default.jpg'" size="large" />
                 </span>
                     <Upload action="//localhost:80/upload"
                             class="upload"
@@ -134,7 +134,7 @@
                 this.userData.birthday = formate;
             },
             uploadSuccess(res, file, fileList) {
-                this.userData.icon = '//localhost:80' + res.data.file.path;
+                this.userData.icon = '//localhost:80' + res.data;
             }
         },
         created() {
