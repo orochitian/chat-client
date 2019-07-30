@@ -4,7 +4,7 @@
             <div class="search-container">
                 <div class="search-input">
                     <Icon class="search-btn" type="ios-search" size="16" />
-                    <input type="text" placeholder="搜索" v-model.trim="searchText">
+                    <input type="text" placeholder="搜索：账号或昵称" v-model.trim="searchText" @input="searchFriend">
                     <Icon class="clear-search-btn" type="ios-close-circle-outline" size="16" v-show="searchText"  @click="clearSearch" />
                 </div>
                 <Icon type="ios-add-circle" class="add-friend" size="26" @click="addFriend" />
@@ -16,12 +16,12 @@
                 </div>
                 <div v-if="list.length > 0">
                     <div class="item"
-                         v-for="(item, index) in list"
+                         v-for="(item, index) in (searchText ? searchList : list)"
                          :key="index"
                          :class="{active: selectIndex === index}"
                          @click="selectChat(item, index)"
                     >
-                        <Avatar class="user-icon" shape="square" :src="item.icon || 'logo.png'" size="large" />
+                        <Avatar class="user-icon" shape="square" :src="item.icon || '/default.jpg'" size="large" />
                         <div class="message-info">
                             <p class="name">{{item.nickname || item.username}}</p>
                             <p class="last-message">{{item.mood}}</p>
@@ -32,12 +32,6 @@
         </div>
         <div class="friend-content">
             <router-view />
-            <!--<div v-if="list.length > 0">-->
-                <!--<div class="header">-->
-                    <!--<p>{{list[selectIndex].username}}</p>-->
-                <!--</div>-->
-                <!--<Button type="success" :to="{path: '/message', query: {user: list[selectIndex].username}}">发消息</Button>-->
-            <!--</div>-->
         </div>
     </div>
 </template>
@@ -50,10 +44,18 @@
                 addFriendShow: false,
                 searchText: '',
                 selectIndex: 0,
-                list: []
+                list: [],
+                searchList: []
             }
         },
         methods: {
+            //  搜索好友
+            searchFriend() {
+                if( this.searchText ) {
+                    let reg = new RegExp(this.searchText);
+                    this.searchList = this.list.filter(item => reg.test(item.username) || reg.test(item.nickname));
+                }
+            },
             //  清除搜索内容
             clearSearch() {
                 this.searchText = '';
@@ -118,13 +120,20 @@
                 axios.get('/user/getFriendList').then(res => {
                     if( res.data.code === 200 ) {
                         this.list = res.data.data;
-                        console.log(this.list);
                     }
                 });
             }
         },
         mounted() {
             this.getFriendList();
+            //  捕获好友申请结果
+            this.$socket.on('friend request result', result => {
+                if( result ) {
+                    this.getFriendList();
+                } else {
+                    this.$Message.error('您的好友申请被无情的拒绝了');
+                }
+            })
         }
     }
 </script>
