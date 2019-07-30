@@ -32,10 +32,11 @@
             uploadToServer(file, callback) {
                 var xhr = new XMLHttpRequest();
                 var formData = new FormData();
-                formData.append('upload', file);
-                xhr.open('post', this.$ajax.defaults.baseURL + '/upload/blogUpload');
+                formData.append('file', file);
+                xhr.open('post', axios.defaults.baseURL + '/upload');
                 xhr.withCredentials = true;
                 xhr.responseType = 'json';
+                xhr.setRequestHeader('token', JSON.parse(sessionStorage.getItem('chat-user')).token);
                 xhr.send(formData);
                 xhr.onreadystatechange = () => {
                     if (xhr.readyState == 4 && xhr.status == 200) {
@@ -86,7 +87,7 @@
                                 if (range) {
                                     fileInput.value = null;
                                     //  在当前光标位置插入图片
-                                    toolbar.quill.insertEmbed(range.index, 'image', this.$ajax.defaults.baseURL + res.file.path);
+                                    toolbar.quill.insertEmbed(range.index, 'image', axios.defaults.baseURL + res.data);
                                     //  将光标移动到图片后面
                                     toolbar.quill.setSelection(range.index + 1);
                                 }
@@ -100,6 +101,7 @@
 
             //  自定义粘贴图片功能
             this.quill.root.addEventListener('paste', evt => {
+                console.log(evt);
                 if (evt.clipboardData && evt.clipboardData.files && evt.clipboardData.files.length) {
                     evt.preventDefault();
                     [].forEach.call(evt.clipboardData.files, file => {
@@ -110,7 +112,7 @@
                             var range = this.quill.getSelection();
                             if (range) {
                                 //  在当前光标位置插入图片
-                                toolbar.quill.insertEmbed(range.index, 'image', this.$ajax.defaults.baseURL + res.file.path);
+                                toolbar.quill.insertEmbed(range.index, 'image', axios.defaults.baseURL + res.data);
                                 //  将光标移动到图片后面
                                 toolbar.quill.setSelection(range.index + 1);
                             }
