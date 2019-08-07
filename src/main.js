@@ -1,8 +1,5 @@
-import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
-import iview from 'iview'
-import 'iview/dist/styles/iview.css'
 import axios from 'axios'
 import io from 'socket.io-client'
 
@@ -11,8 +8,6 @@ Vue.prototype.$socket = io.connect('http://localhost');
 //  自己封装的quill富文本编辑器
 import editor from './components/Editor';
 Vue.component('editor', editor);
-
-Vue.use(iview);
 
 axios.defaults.baseURL = 'http://localhost';
 axios.defaults.withCredentials = true;
